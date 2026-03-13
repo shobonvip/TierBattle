@@ -10,7 +10,7 @@
 
 import { listen } from "@colyseus/tools";
 import { Client } from "@colyseus/sdk";
-import type { server } from "./app.config.ts";
+import server from "./app.config.js"
 
 const client = new Client<typeof server>("http://localhost:2567");
 
