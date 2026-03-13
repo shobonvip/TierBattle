@@ -1,3 +1,5 @@
+import cors from "cors";
+
 import {
     defineServer,
     defineRoom,
@@ -41,6 +43,9 @@ const server = defineServer({
      * Read more: https://expressjs.com/en/starter/basic-routing.html
      */
     express: (app) => {
+
+        app.use(cors({ origin: process.env.CLIENT_URL }));
+        
         app.get("/hi", (req, res) => {
             res.send("It's time to kick ass and chew bubblegum!");
         });
@@ -50,7 +55,7 @@ const server = defineServer({
          * It is recommended to protect this route with a password
          * Read more: https://docs.colyseus.io/tools/monitoring/#restrict-access-to-the-panel-using-a-password
          */
-        app.use("/monitor", monitor());
+        app.use("/monitor_" + process.env.MONITOR_PATH, monitor());
 
         /**
          * Use @colyseus/playground
