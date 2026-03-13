@@ -2,8 +2,8 @@ import { useEffect, useState, useRef } from 'react'
 import { Client, Room, Callbacks } from '@colyseus/sdk'
 
 interface PlayerData {
-  x: Number;
-  y: Number;
+  x: number;
+  y: number;
 }
 
 const client = new Client("ws://localhost:2567");
@@ -34,7 +34,8 @@ function Game1() {
       setPlayers(() => ({}));
 
       // プレイヤー追加
-      callbacks.onAdd("players", (player: any, sessionId: string) => {
+      callbacks.onAdd("players", (player: any, key: any) => {
+        const sessionId = key as string;
         console.log(player, "has been added at", sessionId);
         setPlayers((prev) => ({
           ...prev,
@@ -55,7 +56,8 @@ function Game1() {
       });
 
       // プレイヤー削除
-      callbacks.onRemove("players", (player: any, sessionId: string) => {
+      callbacks.onRemove("players", (_player: any, key: any) => {
+        const sessionId = key as string;
         setPlayers((prev) => {
           const newState = { ...prev };
           delete newState[sessionId];

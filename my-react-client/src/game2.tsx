@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef } from 'react'
 import { Client, Room, Callbacks } from '@colyseus/sdk'
 
 const client = new Client("ws://localhost:2567");
@@ -70,7 +70,8 @@ function Game2() {
       setMessageData([]);
 
       // プレイヤー追加
-      callbacks.onAdd("players", (player: any, sessionId: string) => {
+      callbacks.onAdd("players", (player: any, key: any) => {
+        const sessionId = key as string;
         setPlayers((prev) => ({
           ...prev,
           [sessionId]: player.name
@@ -85,7 +86,8 @@ function Game2() {
       });
 
       // プレイヤー削除
-      callbacks.onRemove("players", (player: any, sessionId: string) => {
+      callbacks.onRemove("players", (_player: any, key: any) => {
+        const sessionId = key as string;
         setPlayers((prev) => {
           const newState = { ...prev };
           delete newState[sessionId];
@@ -94,7 +96,7 @@ function Game2() {
       });
 
       
-      callbacks.onAdd("chatHistory", (data: any, index: number) => {
+      callbacks.onAdd("chatHistory", (data: any, _key: any) => {
         console.log("GET NEW");
         setMessageData([...activeRoom.state.chatHistory.toArray()]);
 
@@ -104,7 +106,7 @@ function Game2() {
         });
       });
 
-      callbacks.onRemove("chatHistory", (data: any, index: number) => {
+      callbacks.onRemove("chatHistory", (_data: any, _key: any) => {
         console.log("GET DEL");
         setMessageData([...activeRoom.state.chatHistory.toArray()]);
       });
