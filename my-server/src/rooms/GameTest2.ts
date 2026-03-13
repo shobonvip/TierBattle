@@ -24,7 +24,7 @@ export class GameTest2State extends Schema {
 }
 
 export class GameTest2Room extends Room {
-  static readonly CHAT_MAX_LENGTH: number = 10;
+  static readonly CHAT_MAX_LENGTH: number = 100;
   state = new GameTest2State();
 
   sendMessage (message: ChatData)  {
