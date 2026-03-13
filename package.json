@@ -1,0 +1,6 @@
+{
+  "dependencies": {
+    "@colyseus/sdk": "^0.17.34",
+    "colyseus": "^0.17.8"
+  }
+}

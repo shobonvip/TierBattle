@@ -1,0 +1,22 @@
+/* 一旦これだけにしてみてください */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html, body, #root {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden; /* スクロールバーを出さない */
+  background-color: #0f172a; /* 背景を暗くして丸を見えやすくする */
+  color: #ffffff;
+}
+
+:link {
+  color: #dddd00;
+}
+
+:visited {
+  color: #bbbb00;
+}

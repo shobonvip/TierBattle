@@ -1,0 +1,4 @@
+node_modules/
+.env
+my-server/node_modules/
+my-react-client/node_modules/
