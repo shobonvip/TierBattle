@@ -1,7 +1,8 @@
 import { useState, useRef } from 'react'
 import { Client, Room, Callbacks } from '@colyseus/sdk'
 
-const client = new Client("ws://localhost:2567");
+const endpoint = import.meta.env.VITE_SERVER_URL;
+const client = new Client(endpoint);
 
 interface ChatMessage {
   senderId: string;

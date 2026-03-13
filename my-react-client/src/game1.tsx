@@ -6,7 +6,8 @@ interface PlayerData {
   y: number;
 }
 
-const client = new Client("ws://localhost:2567");
+const endpoint = import.meta.env.VITE_SERVER_URL;
+const client = new Client(endpoint);
 
 function Game1() {
   const [room, setRoom] = useState<Room | null>(null);
