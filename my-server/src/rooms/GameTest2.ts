@@ -25,9 +25,15 @@ export class GameTest2State extends Schema {
 
 export class GameTest2Room extends Room {
   static readonly CHAT_MAX_LENGTH: number = 100;
+  static readonly MESSAGE_MAX_LENGTH: number = 300;
+  static readonly NAME_MAX_LENGTH: number = 100;
+  
   state = new GameTest2State();
 
   sendMessage (message: ChatData)  {
+    if (message.message.length > GameTest2Room.MESSAGE_MAX_LENGTH) {
+      message.message = message.message.slice(0, GameTest2Room.MESSAGE_MAX_LENGTH);
+    }
     this.state.chatHistory.push(message);
     console.log(message.name + ": " + message.message);
     while (this.state.chatHistory.length > GameTest2Room.CHAT_MAX_LENGTH) {
@@ -38,6 +44,11 @@ export class GameTest2Room extends Room {
   onCreate (options: any) {    
     // 名前変更
     this.onMessage("change_name", (client: Client, data: string) => {
+      
+      if (data.length > GameTest2Room.NAME_MAX_LENGTH) {
+        data = data.slice(0, GameTest2Room.NAME_MAX_LENGTH);
+      }
+
       const player = this.state.players.get(client.sessionId);
       const chatMessage: ChatData = new ChatData({
         senderId: "",

@@ -11,10 +11,10 @@ interface ChatMessage {
   createdAt: number;
 }
 
+const MESSAGE_MAX_LENGTH: number = 300;
+const NAME_MAX_LENGTH: number = 100;
+
 export function ChatDisplay({ chatHistory }: { chatHistory: Array<ChatMessage> }) {
-
-
-
   return ( 
     <div className="flex flex-col-reverse w-full h-64 bg-black/30 rounded-lg p-4 overflow-y-auto border border-white/10 custom-scrollbar">
       {[...chatHistory].reverse().map((chat, index) => (
@@ -43,6 +43,7 @@ function Game2() {
   const [roomName, setRoomName] = useState<string | null>(null);
   const [players, setPlayers] = useState<{ [id: string]: string }>({});
   const [messageData, setMessageData] = useState<Array<ChatMessage>>([]);
+  const [errors, setErrors] = useState<string | null>(null);
 
   const [inputPass, setInputPass] = useState<string>("114514");
   const [inputName, setInputName] = useState<string>("野　獣　先　輩");
@@ -113,6 +114,7 @@ function Game2() {
       });
 
     } catch (e) {
+      setErrors("接続に失敗しました");
       console.error("connect 失敗", e);
     }
 
@@ -120,10 +122,17 @@ function Game2() {
 
   const changeName = (userName: string) => {
     try {
+      if (userName.length > NAME_MAX_LENGTH) {
+        setErrors("名前が長すぎます！" + userName.length + "/" + NAME_MAX_LENGTH + "文字");
+        return;
+      }
+
       if (roomRef.current) {
+        setErrors(null);
         roomRef.current.send("change_name", userName);
       }
     } catch (e) {
+      setErrors("名前変更に失敗しました");
       console.error("changeName 失敗", e);
     }
   };
@@ -133,11 +142,17 @@ function Game2() {
       return;
     }
 
+    if (message.length > MESSAGE_MAX_LENGTH) {
+      setErrors("発言が長すぎます！" + message.length + "/" + MESSAGE_MAX_LENGTH + "文字");
+      return;
+    }
     try {
       if (roomRef.current) {
+        setErrors(null);
         roomRef.current.send("chat", message);
       }
     } catch (e) {
+      setErrors("発言に失敗しました");
       console.error("sendMessage 失敗", e);
     }
   };
@@ -189,6 +204,7 @@ function Game2() {
         接続状況: {room ? "✅ Connected" : "❌ Disconnected"} <br />
         ルーム名: {roomName !== null ? roomName: "None"} <br />
         プレイヤー数: {Object.keys(players).length} <br />
+        <b> {errors !== null ? "ERROR: " + errors: ""} </b> <br />
       </div>
 
       <div> 参加者一覧：
