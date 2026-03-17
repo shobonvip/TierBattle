@@ -11,7 +11,7 @@ class Player extends Schema {
   }
 }
 
-class ChatData extends Schema {
+export class ChatData extends Schema {
   @type("string") senderId: string;
   @type("string") name: string;
   @type("string") message: string;
