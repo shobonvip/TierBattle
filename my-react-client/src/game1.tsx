@@ -16,18 +16,25 @@ function Game1() {
   const [inputPass, setInputPass] = useState<string>("");
 
   const roomRef = useRef<Room | null>(null);
+  const shoriRef = useRef<Boolean>(false);
 
   const connect = async (userPasscode: string) => {
+    if (shoriRef.current) {
+      return;
+    }
+    
     try {
       roomRef.current?.leave();
-
       roomRef.current = null;
+
+      shoriRef.current = true;
 
       const activeRoom = await client.joinOrCreate("gametest_1_room", {
         passcode: userPasscode
       });
 
       roomRef.current = activeRoom;
+      shoriRef.current = false;
 
       const callbacks = Callbacks.get(activeRoom);
       setRoom(activeRoom);

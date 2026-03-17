@@ -50,11 +50,18 @@ function Game2() {
   const [inputMessage, setInputMessage] = useState<string>("");
 
   const roomRef = useRef<Room | null>(null);
+  const shoriRef = useRef<Boolean>(false);
 
   const connect = async (userPasscode: string) => {
+    if (shoriRef.current) {
+      return;
+    }
+
     try {
       roomRef.current?.leave();
       roomRef.current = null;
+
+      shoriRef.current = true;
 
       const activeRoom = await client.joinOrCreate("gametest_2_room", {
         passcode: userPasscode,
@@ -62,6 +69,7 @@ function Game2() {
       });
 
       roomRef.current = activeRoom;
+      shoriRef.current = false;
 
       const callbacks = Callbacks.get(activeRoom);
 
@@ -146,6 +154,7 @@ function Game2() {
       setErrors("発言が長すぎます！" + message.length + "/" + MESSAGE_MAX_LENGTH + "文字");
       return;
     }
+
     try {
       if (roomRef.current) {
         setErrors(null);
