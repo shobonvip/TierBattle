@@ -14,6 +14,7 @@ import {
  */
 import { GameTest1Room } from "./rooms/GameTest1.js";
 import { GameTest2Room } from "./rooms/GameTest2.js";
+import { GameTest3Room } from "./rooms/GameTest3.js";
 
 
 const server = defineServer({
@@ -22,7 +23,8 @@ const server = defineServer({
      */
     rooms: {
         gametest_1_room: defineRoom(GameTest1Room).filterBy(['passcode']),
-        gametest_2_room: defineRoom(GameTest2Room).filterBy(['passcode'])
+        gametest_2_room: defineRoom(GameTest2Room).filterBy(['passcode']),
+        gametest_3_room: defineRoom(GameTest3Room).filterBy(['passcode'])
     },
 
     /**

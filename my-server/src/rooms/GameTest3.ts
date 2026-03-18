@@ -37,9 +37,9 @@ import { ChatData } from "./GameTest2.js";
 class Player extends Schema {
   @type("string") name = "NO NAME";
   @type("number") point = 0; // 点数
-  @type("string") theme = "自由に記入してください"; // input in P0
-  @type([ String ]) answers = new ArraySchema<String>(); // input in P1
-  @type({ map: Number }) scoreForAnswers = new MapSchema<Number>(); // input in P2
+//  @type("string") theme = "自由に記入してください"; // input in P0
+//  @type([ String ]) answers = new ArraySchema<String>(); // input in P1
+//  @type({ map: Number }) scoreForAnswers = new MapSchema<Number>(); // input in P2
 
   constructor(options?: any) {
     super();
@@ -54,10 +54,11 @@ export class GameTest3State extends Schema {
   @type({ map: Player }) players = new MapSchema<Player>();
   // チャット履歴
   @type([ ChatData ]) chatHistory = new ArraySchema<ChatData>();
+
   // 解答をすべて集めた配列
-  @type([ String ]) allAnswers = new ArraySchema<String>();
+//  @type([ String ]) allAnswers = new ArraySchema<String>();
   // 人に対する解答
-  @type({ map: [ String ] }) answersForPeople = new MapSchema<ArraySchema<String>>();
+//  @type({ map: [ String ] }) answersForPeople = new MapSchema<ArraySchema<String>>();
 
   /*
     Phase
@@ -68,8 +69,10 @@ export class GameTest3State extends Schema {
       4 ... Result time! Players' score change.
       5 ... Game end, total result.
   */
+  @type("string") adminSessionId = "";
   @type("number") phase = 0;
-  @type("string") themeSessionId = "";
+  @type("number") remainingTime = 0;
+//  @type("string") themeSessionId = "";
 }
 
 
@@ -77,6 +80,9 @@ export class GameTest3Room extends Room {
   static readonly CHAT_MAX_LENGTH: number = 100;
   static readonly MESSAGE_MAX_LENGTH: number = 300;
   static readonly NAME_MAX_LENGTH: number = 100;
+
+  static readonly PHASE_1_TIME: number = 3;
+  static readonly PHASE_5_TIME: number = 2;
   
   state = new GameTest3State();
 
@@ -91,9 +97,75 @@ export class GameTest3Room extends Room {
       this.state.chatHistory.shift();
     }
   }
+
+  // phase 0
+  // 初期化とかやろう
+  phaseZeroEvent() {
+    console.log("PHASE 0");
+    this.state.phase = 0;
+    this.state.remainingTime = 0;
+    this.state.players.forEach((player, _sessionId) => {
+      player.point = 0;
+    });
+  }
+
+  // phase 1
+  phaseOneEvent () { 
+    console.log("PHASE 1");
+    this.state.phase = 1;
+    this.state.remainingTime = GameTest3Room.PHASE_1_TIME;
+
+    const interval = this.clock.setInterval(() => {
+      if (
+        this.state.remainingTime <= 0
+        || this.state.phase !== 1
+      )  {
+        interval.clear();
+        this.phaseFiveEvent();
+      }
+      
+      this.state.players.forEach((player, _sessionId) => {
+        player.point += Math.floor(Math.random() * 100);
+      });
+
+      this.state.remainingTime -= 1;
+    }, 1000);
+  }
+
+  // phase 5
+  // 結果表示
+  phaseFiveEvent () { 
+    console.log("PHASE 5");
+    this.state.phase = 5;
+    this.state.remainingTime = GameTest3Room.PHASE_5_TIME;
+
+    const interval = this.clock.setInterval(() => {
+      if (
+        this.state.remainingTime <= 0
+        || this.state.phase !== 5
+      )  {
+        interval.clear();
+        this.phaseZeroEvent();
+      }
+
+      this.state.remainingTime -= 1;
+    }, 1000);
+  }
+
+  // ゲームスタートを処理しようとする
+  gameStart () {
+    if (this.state.phase !== 0) {
+      return;
+    }
+    if (this.state.players.size <= 1) {
+      return;
+    }
+    this.phaseOneEvent();
+  }
   
   // ルーム作成
   onCreate (options: any) {    
+
     // 名前変更
     this.onMessage("change_name", (client: Client, data: string) => {
       if (data.length > GameTest3Room.NAME_MAX_LENGTH) {
@@ -121,36 +193,70 @@ export class GameTest3Room extends Room {
       });
       this.sendMessage(chatMessage);
     });
+
+    // ゲームスタート
+    this.onMessage("game_start", (client: Client) => {
+      if (client.sessionId !== this.state.adminSessionId) {
+        console.log("gameStart failed, because it was not from admin!")
+        return;
+      }
+      if (this.state.phase !== 0) {
+        console.log("gameStart failed, because game already started!")
+        return;
+      }
+      if (this.state.players.size <= 1) {
+        console.log("gameStart failed, because only one player!")
+        return;
+      }
+      this.gameStart();
+    });
   }
 
   // 参加
   onJoin (client: Client, options: any) {
     console.log(client.sessionId, "joined!");
     this.state.players.set(client.sessionId, new Player({ name: options.name }));
-    console.log(this.state.players.get(client.sessionId));
+
+    // admin がいない場合、自分が admin になる
+    if (this.state.adminSessionId === "") {
+      console.log("admin changed to " + client.sessionId);
+      this.state.adminSessionId = client.sessionId;
+    }
+
     const chatMessage: ChatData = new ChatData({
       senderId: "",
       name: "",
       message: options.name + "が入室しました。",
       createdAt: Date.now()
     });
+
     this.sendMessage(chatMessage);
   }
 
   // 退室
   onLeave (client: Client, code: CloseCode) {
+    const playerName = this.state.players.get(client.sessionId).name
+    this.state.players.delete(client.sessionId);
+
+    // admin が退室した場合、入室している人の一人を admin にする
+    if (this.state.adminSessionId === client.sessionId) {
+      if (this.state.players.size == 0) {
+        this.state.adminSessionId = "";
+      } else {
+        const firstEntry = this.state.players.entries().next().value;
+        this.state.adminSessionId = firstEntry[0];
+      }
+    }
+
     const chatMessage: ChatData = new ChatData({
       senderId: "",
       name: "",
-      message: this.state.players.get(client.sessionId).name + "が退室しました。",
+      message: playerName + "が退室しました。",
       createdAt: Date.now()
     });
     console.log(client.sessionId, "left!", code);
-    this.state.players.delete(client.sessionId);
     this.sendMessage(chatMessage);
   }
-
-
 
   onDispose() {
     console.log("room", this.roomId, "disposing...");
