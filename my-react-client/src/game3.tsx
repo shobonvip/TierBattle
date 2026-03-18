@@ -137,6 +137,7 @@ function Game3() {
         });
       });
       
+      // チャット履歴追加
       callbacks.onAdd("chatHistory", (data: any, _key: any) => {
         setMessageData([...activeRoom.state.chatHistory.toArray()]);
 
@@ -145,20 +146,24 @@ function Game3() {
         });
       });
 
+      // チャット履歴削除
       callbacks.onRemove("chatHistory", (_data: any, _key: any) => {
         setMessageData([...activeRoom.state.chatHistory.toArray()]);
       });
 
+      // admin の sessionId を監視
       callbacks.listen("adminSessionId", (data: any) => {
         const sessionId = data as string;
         adminIdRef.current = sessionId;
       })
 
+      // phase を監視
       callbacks.listen("phase", (data: any) => {
         const phaseNumber = data as number;
         setPhase(phaseNumber);
       })
 
+      // 残り時間を監視
       callbacks.listen("remainingTime", (data: any) => {
         const remainingTimeNumber = data as number;
         setRemainingTime(remainingTimeNumber);
@@ -173,6 +178,7 @@ function Game3() {
 
   };
 
+  // 名前変更を行う
   const changeName = (userName: string) => {
     try {
       if (userName.length > NAME_MAX_LENGTH) {
@@ -190,6 +196,7 @@ function Game3() {
     }
   };
 
+  // チャット発言
   const sendMessage = (message: string) => {
     if (message === "") {
       return;
@@ -212,6 +219,7 @@ function Game3() {
     }
   };
 
+  // ゲーム開始ボタンを押す
   const gameStartButtonEvent = () => {
     if (!roomRef.current) {
       setErrors("接続されていません");
@@ -232,6 +240,7 @@ function Game3() {
   };
 
 
+  // HTML 表示
   return (
     <div className="relative w-screen h-screen bg-slate-900 overflow-hidden"> 
 

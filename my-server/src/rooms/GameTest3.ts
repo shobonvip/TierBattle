@@ -110,6 +110,8 @@ export class GameTest3Room extends Room {
   }
 
   // phase 1
+  // 現在はランダムで点数が増えるだけ（テスト）
+  // ここではお題を決めてもらう。
   phaseOneEvent () { 
     console.log("PHASE 1");
     this.state.phase = 1;
@@ -223,6 +225,7 @@ export class GameTest3Room extends Room {
       this.state.adminSessionId = client.sessionId;
     }
 
+    // 入室メッセージを送る.
     const chatMessage: ChatData = new ChatData({
       senderId: "",
       name: "",
@@ -248,6 +251,7 @@ export class GameTest3Room extends Room {
       }
     }
 
+    // 退室メッセージを送る.
     const chatMessage: ChatData = new ChatData({
       senderId: "",
       name: "",
