@@ -5,11 +5,12 @@ import './index.css'
 import Game1 from './game1.tsx'
 import Game2 from './game2.tsx'
 import Game3 from './game3.tsx'
+import tierBattleExplain from './tier_battle_explain.png'
 
 function MainPage() {
   return (
-    <div className="relative w-screen h-screen bg-slate-900 overflow-hidden text-white">
-      <p> Hello, World! </p>
+    <div className="relative w-screen h-screen bg-slate-900 overflow-hidden text-white">  
+      <img src={tierBattleExplain} /> <br />
       <p> <Link to="/game1"> GAME 1 </Link> </p>
       <p> <Link to="/game2"> CHAT </Link> </p>
       <p> <Link to="/game3"> TIER BATTLE </Link> </p>
